@@ -3,7 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist'
 
 import Layout from "../components/layout"
 import SEO from "../components/seo"
-import PDFFile from '../books/1984.pdf'
+import PDFFile from '../books/war-and-peace.pdf'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.5.207/pdf.worker.js`
 
@@ -11,7 +11,7 @@ const IndexPage = () => {
   const canvas = useRef<HTMLCanvasElement>(null)
   const [ctx, setCtx] = useState<CanvasRenderingContext2D>(null)
   
-  const scale: number = 1.2
+  const scale: number = 1.35
   const [pdfDoc, setPdfDoc] = useState<any>(null)
   const [pageNum, setPageNum] = useState<number>(1)
   const [numPages, setNumPages] = useState<number>(null)
@@ -66,10 +66,15 @@ const IndexPage = () => {
   return (
     <Layout>
       <SEO title="Home" />
-      <h1>Hi people</h1>
-      <p>Welcome to your new Gatsby site.</p>
-      <p>Now go build something great.</p>
-      <p>{pageNum} page of {numPages}</p>
+      <div className="flex items-center justify-evenly mb-2">
+        <button className="changePage focus:outline-none">
+          <span className="relative">Prev Page</span>
+        </button>
+        <p className="font-medium">{pageNum} page of {numPages}</p>
+        <button className="changePage focus:outline-none">
+          <span className="relative">Next Page</span>
+        </button>
+      </div>
       <canvas ref={canvas} className="mx-auto" />
     </Layout>
   )

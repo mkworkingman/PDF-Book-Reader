@@ -23,11 +23,60 @@ body {
 nav {
   max-width: 960px;
 
-  a[aria-current="page"] {
-    @apply bg-indigo-600 #{!important};
+  a {
+    -webkit-tap-highlight-color: transparent;
+
+    &[aria-current="page"] {
+      @apply bg-indigo-600 #{!important};
+    }
   }
 }
 
 main {
   max-width: 960px;
+}
+
+.changePage {
+  padding: 10px 15px;
+  border-radius: 7px;
+  border: none;
+  background: linear-gradient(45deg, #2563EB 10%, #60A5FA 70%);
+  box-shadow: 0 3px 5px 2px rgba(67, 132, 243, .3);
+  color: white;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  font-weight: 500;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  transition: box-shadow .7s;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 7px;
+    background: linear-gradient(45deg, #3730A3 30%, #6366F1 90%);
+    opacity: 0;
+    transition: opacity .7s;
+  }
+
+  &:hover {
+    box-shadow: 0 3px 5px 2px rgba(77, 75, 202, .3);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &:last-child {
+    background: linear-gradient(135deg, #60A5FA 30%, #2563EB 90%);
+
+    &::before {
+      background: linear-gradient(135deg, #6366F1 10%, #3730A3 70%);
+    }
+  }
 }
