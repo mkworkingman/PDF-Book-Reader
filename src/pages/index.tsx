@@ -14,9 +14,7 @@ const IndexPage = () => {
   const scale: number = 1.35
   const [pdfDoc, setPdfDoc] = useState<any>(null)
   const [pageNum, setPageNum] = useState<number>(1)
-  const [numPages, setNumPages] = useState<number>(null)
   const [pageRendering, setPageRendering] = useState<boolean>(false)
-  const [pageNumPending , setPageNumPending ] = useState<number>(null)
 
   const renderPage = (num: any) => {
     if (canvas && canvas.current && ctx) {
@@ -33,11 +31,6 @@ const IndexPage = () => {
 
         page.render(renderContext).promise.then(() => {
           setPageRendering(false)
-    
-          if (pageNumPending !== null) {
-            renderPage(pageNumPending)
-            setPageNumPending(null)
-          }
         })
       })
     }
@@ -51,31 +44,48 @@ const IndexPage = () => {
     if (ctx) {
       pdfjsLib.getDocument(PDFFile).promise.then((PDFDocumentProxy: any) => {
         setPdfDoc(PDFDocumentProxy)
-        setNumPages(PDFDocumentProxy.numPages)
       })
     }
   }, [ctx])
 
   useEffect(() => {
-    // if (canvas && canvas.current && ctx && pdfDoc && numPages) {
-    if (numPages) {
+    if (pdfDoc) {
       renderPage(pageNum)
     }
-  }, [numPages])
+  }, [pdfDoc])
+
+  const changePage = (increment: boolean) => {
+    const newPageNum = increment
+      ? pageNum + 1
+      : pageNum - 1
+    
+    if (newPageNum > 0 && newPageNum <= pdfDoc.numPages) {
+      setPageNum(newPageNum)
+      renderPage(newPageNum)
+    }
+  }
 
   return (
     <Layout>
       <SEO title="Home" />
       <div className="flex items-center justify-evenly mb-2">
-        <button className="changePage focus:outline-none">
-          <span className="relative">Prev Page</span>
+        <button
+          onClick={() => changePage(false)}
+          className="changePage focus:outline-none"
+          disabled={pageNum === 1}
+        >
+          <span className="relative z-10">Prev Page</span>
         </button>
-        <p className="font-medium">{pageNum} page of {numPages}</p>
-        <button className="changePage focus:outline-none">
-          <span className="relative">Next Page</span>
+        <p className="font-medium">{pageNum} page of {pdfDoc && pdfDoc.numPages}</p>
+        <button
+          onClick={() => changePage(true)}
+          className="changePage focus:outline-none"
+          disabled={pdfDoc && pageNum === pdfDoc.numPages}
+        >
+          <span className="relative z-10">Next Page</span>
         </button>
       </div>
-      <canvas ref={canvas} className="mx-auto" />
+      <canvas ref={canvas} className={"mx-auto "} />
     </Layout>
   )
 }

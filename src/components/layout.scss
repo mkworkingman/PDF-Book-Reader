@@ -51,7 +51,7 @@ main {
   position: relative;
   transition: box-shadow .7s;
 
-  &::before {
+  &::before, &::after {
     content: '';
     position: absolute;
     width: 100%;
@@ -59,9 +59,16 @@ main {
     top: 0;
     left: 0;
     border-radius: 7px;
-    background: linear-gradient(45deg, #3730A3 30%, #6366F1 90%);
     opacity: 0;
     transition: opacity .7s;
+  }
+
+  &::before {
+    background: linear-gradient(45deg, #3730A3 30%, #6366F1 90%);
+  }
+
+  &::after {
+    background: #7492c0;
   }
 
   &:hover {
@@ -77,6 +84,18 @@ main {
 
     &::before {
       background: linear-gradient(135deg, #6366F1 10%, #3730A3 70%);
+    }
+  }
+
+  &:disabled {
+    box-shadow: none;
+
+    &::before {
+      opacity: 0;
+    }
+
+    &::after {
+      opacity: 1;
     }
   }
 }
