@@ -72,6 +72,16 @@ const IndexPage = () => {
     </svg>
   )
 
+  const checkKey = (e: KeyboardEvent) => {
+    if (e.code === 'ArrowLeft') {
+      changePage(false)
+    } else if (e.code === 'ArrowRight') {
+      changePage(true)
+    }
+  }
+
+  document.onkeydown = checkKey;
+
   return (
     <Layout>
       <SEO title="Home" />
@@ -97,9 +107,16 @@ const IndexPage = () => {
           : <Spinner />
         }
       </div>
-      <div className="flex justify-center">
-        <canvas ref={canvas} className={pageRendering ? 'hidden': ''} />
-        <Spinner display={pageRendering ? '': 'hidden'} />
+      <div className="flex justify-center items-center">
+        <div className={pageRendering ? 'hidden': 'flex flex-col items-center'}>
+          <canvas ref={canvas} />
+          <p className={"text-center font-medium" + (pdfDoc ? '' : ' hidden')}>Go to:</p>
+          <input
+            value={pageNum}
+            className={"rounded-lg focus:outline-none border-2 border-solid border-indigo-400 w-40 px-2 py-1 focus:border-indigo-500 text-center font-medium" + (pdfDoc ? '' : ' hidden')}
+          />
+        </div>
+        <Spinner display={pageRendering ? '' : 'hidden'} />
       </div>
     </Layout>
   )
