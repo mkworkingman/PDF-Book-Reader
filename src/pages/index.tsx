@@ -14,6 +14,7 @@ const IndexPage = () => {
   const scale: number = 1.35
   const [pdfDoc, setPdfDoc] = useState<any>(null)
   const [pageNum, setPageNum] = useState<number>(1)
+  const [goTo, setGoTo] = useState<string>('1')
   const [pageRendering, setPageRendering] = useState<boolean>(false)
 
   const renderPage = (num: any) => {
@@ -54,14 +55,46 @@ const IndexPage = () => {
     }
   }, [pdfDoc])
 
-  const changePage = (increment: boolean) => {
-    const newPageNum = increment
-      ? pageNum + 1
-      : pageNum - 1
-    
-    if (newPageNum > 0 && newPageNum <= pdfDoc.numPages) {
-      setPageNum(newPageNum)
-      renderPage(newPageNum)
+  const changePage = (newPageNum: number) => {
+    if (!pageRendering) {
+      if (newPageNum > 0 && newPageNum <= pdfDoc.numPages) {
+        setGoTo(newPageNum.toString())
+        setPageNum(newPageNum)
+        renderPage(newPageNum)
+      } else {
+        if (newPageNum) {
+          setGoTo(pdfDoc.numPages.toString())
+          setPageNum(pdfDoc.numPages)
+          renderPage(pdfDoc.numPages)
+        } else {
+          setGoTo('1')
+          setPageNum(1)
+          renderPage(1)
+        }
+      }
+    }
+  }
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      changePage(Number(goTo))
+    }
+  }
+
+  const changeGoTo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.currentTarget
+    if (/^(\s*|\d+)$/.test(value)) {
+      setGoTo(value)
+    } else {
+      e.preventDefault()
+    }
+  }
+
+  const arrowAction = (e: KeyboardEvent) => {
+    if (e.code === 'ArrowLeft') {
+      changePage(pageNum - 1)
+    } else if (e.code === 'ArrowRight') {
+      changePage(pageNum + 1)
     }
   }
 
@@ -72,15 +105,7 @@ const IndexPage = () => {
     </svg>
   )
 
-  const checkKey = (e: KeyboardEvent) => {
-    if (e.code === 'ArrowLeft') {
-      changePage(false)
-    } else if (e.code === 'ArrowRight') {
-      changePage(true)
-    }
-  }
-
-  document.onkeydown = checkKey;
+  document.onkeydown = arrowAction;
 
   return (
     <Layout>
@@ -89,15 +114,15 @@ const IndexPage = () => {
         {pdfDoc
           ? <>
               <button
-                onClick={() => changePage(false)}
+                onClick={() => changePage(pageNum - 1)}
                 className="changePage focus:outline-none"
                 disabled={pageNum === 1 || pageRendering}
               >
                 <span className="relative z-10">Prev Page</span>
               </button>
-              <p className="font-medium">{pageNum} page of {pdfDoc && pdfDoc.numPages}</p>
+              <p className="font-medium w-60 text-center">{pageNum} page of {pdfDoc && pdfDoc.numPages}</p>
               <button
-                onClick={() => changePage(true)}
+                onClick={() => changePage(pageNum + 1)}
                 className="changePage focus:outline-none"
                 disabled={pageNum === pdfDoc.numPages || pageRendering}
               >
@@ -112,7 +137,9 @@ const IndexPage = () => {
           <canvas ref={canvas} />
           <p className={"text-center font-medium" + (pdfDoc ? '' : ' hidden')}>Go to:</p>
           <input
-            value={pageNum}
+            value={goTo}
+            onKeyDown={onKeyDown}
+            onChange={changeGoTo}
             className={"rounded-lg focus:outline-none border-2 border-solid border-indigo-400 w-40 px-2 py-1 focus:border-indigo-500 text-center font-medium" + (pdfDoc ? '' : ' hidden')}
           />
         </div>
