@@ -10,8 +10,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.j
 const IndexPage = () => {
   const canvas = useRef<HTMLCanvasElement>(null)
   const [ctx, setCtx] = useState<CanvasRenderingContext2D>(null)
+  const [bookSelected, setBookSelected] = useState<string>("")
   
-  const scale: number = 1.35
+  const scale: number = 1.2
   const [pdfDoc, setPdfDoc] = useState<any>(null)
   const [pageNum, setPageNum] = useState<number>(1)
   const [goTo, setGoTo] = useState<string>('1')
@@ -93,6 +94,11 @@ const IndexPage = () => {
     }
   }
 
+  const setBook = (value: string) => {
+    localStorage.setItem("current", value)
+    setBookSelected(value)
+  }
+
   const Spinner = ({display = ''}): JSX.Element => (
     <svg className={"spinner animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500 " + display} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -105,28 +111,46 @@ const IndexPage = () => {
   return (
     <Layout>
       <SEO title="Home" />
-      <div className="flex items-center justify-evenly mb-2">
-        {pdfDoc
-          ? <>
-              <button
-                onClick={() => changePage(pageNum - 1)}
-                className="changePage focus:outline-none"
-                disabled={pageNum === 1 || pageRendering}
-              >
-                <span className="relative z-10">Prev Page</span>
-              </button>
-              <p className="font-medium w-60 text-center">{pageNum} page of {pdfDoc && pdfDoc.numPages}</p>
-              <button
-                onClick={() => changePage(pageNum + 1)}
-                className="changePage focus:outline-none"
-                disabled={pageNum === pdfDoc.numPages || pageRendering}
-              >
-                <span className="relative z-10">Next Page</span>
-              </button>
-          </>
-          : <Spinner />
-        }
-      </div>
+      {pdfDoc
+        ? <>
+          <div className="flex flex-col justify-center text-center">
+            <p>Please, select a book:</p>
+            <select
+              className="focus:outline-none self-center w-60 text-center"
+              style={{textAlignLast: 'center'}}
+              onChange={e => setBook(e.target.value)}
+              value={bookSelected}
+            >
+              <option value="">Select a book</option>
+              <option value="1984">1984</option>
+              <option value="crime-and-punishment">Crime And Punishment</option>
+              <option value="dracula">Dracula</option>
+              <option value="the-great-gatsby">The Great Gatsby</option>
+              <option value="war-and-peace">War And Peace</option>
+            </select>
+          </div>
+          <div className="flex items-center justify-evenly mb-2">
+            <button
+              onClick={() => changePage(pageNum - 1)}
+              className="changePage focus:outline-none"
+              disabled={pageNum === 1 || pageRendering}
+            >
+              <span className="relative z-10">Prev Page</span>
+            </button>
+            <p className="font-medium w-60 text-center">{pageNum} page of {pdfDoc && pdfDoc.numPages}</p>
+            <button
+              onClick={() => changePage(pageNum + 1)}
+              className="changePage focus:outline-none"
+              disabled={pageNum === pdfDoc.numPages || pageRendering}
+            >
+              <span className="relative z-10">Next Page</span>
+            </button>
+          </div>
+        </>
+        : <div className="flex justify-center">
+          <Spinner />
+        </div>
+      }
       <div className="flex justify-center items-center">
         <div className={pageRendering ? 'hidden': 'flex flex-col items-center'}>
           <canvas ref={canvas} />

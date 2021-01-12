@@ -24,7 +24,6 @@ const Layout = ({ children }: Props) => {
       <header className="w-full h-12 sm:h-16 bg-indigo-400 shadow-md fixed">
         <nav className="flex h-full px-4 mx-auto">
           <Link className="no-underline text-gray-800 font-medium flex items-center px-3.5 transition-colors duration-200 hover:bg-indigo-500 focus:outline-none" to="/">Reader</Link>
-          <div className="text-gray-800 font-medium flex items-center px-3.5 transition-colors duration-200 hover:bg-indigo-500 cursor-default">Select a book</div>
           <Link className="no-underline text-gray-800 font-medium flex items-center px-3.5 transition-colors duration-200 hover:bg-indigo-500 focus:outline-none" to="/about">About</Link>
         </nav>
       </header>
