@@ -3,14 +3,14 @@ import * as pdfjsLib from 'pdfjs-dist'
 
 import Layout from "../components/layout"
 import SEO from "../components/seo"
-import PDFFile from '../books/war-and-peace.pdf'
+// import PDFFile from '../books/war-and-peace.pdf'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.5.207/pdf.worker.js`
 
 const IndexPage = () => {
   const canvas = useRef<HTMLCanvasElement>(null)
   const [ctx, setCtx] = useState<CanvasRenderingContext2D>(null)
-  const [bookSelected, setBookSelected] = useState<string>("")
+  const [bookSelected, setBookSelected] = useState<string>(localStorage.getItem('current') || '')
   
   const scale: number = 1.2
   const [pdfDoc, setPdfDoc] = useState<any>(null)
@@ -40,10 +40,16 @@ const IndexPage = () => {
 
   useEffect(() => {
     setCtx(canvas.current.getContext('2d'))
-    pdfjsLib.getDocument(PDFFile).promise.then((PDFDocumentProxy: any) => {
-      setPdfDoc(PDFDocumentProxy)
-    })
   }, [canvas])
+
+  useEffect(() => {
+    if (bookSelected) {
+      const PDFFile = require(`../books/${bookSelected}.pdf`)
+      pdfjsLib.getDocument(PDFFile).promise.then((PDFDocumentProxy: any) => {
+        setPdfDoc(PDFDocumentProxy)
+      })
+    }
+  }, [bookSelected])
 
   useEffect(() => {
     if (pdfDoc) {
@@ -111,24 +117,24 @@ const IndexPage = () => {
   return (
     <Layout>
       <SEO title="Home" />
+      <div className="flex flex-col justify-center text-center">
+        <p>Please, select a book:</p>
+        <select
+          className="focus:outline-none self-center w-60 text-center"
+          style={{textAlignLast: 'center'}}
+          onChange={e => setBook(e.target.value)}
+          value={bookSelected}
+        >
+          <option value="" disabled>Select a book</option>
+          <option value="1984">1984</option>
+          <option value="crime-and-punishment">Crime And Punishment</option>
+          <option value="dracula">Dracula</option>
+          <option value="the-great-gatsby">The Great Gatsby</option>
+          <option value="war-and-peace">War And Peace</option>
+        </select>
+      </div>
       {pdfDoc
         ? <>
-          <div className="flex flex-col justify-center text-center">
-            <p>Please, select a book:</p>
-            <select
-              className="focus:outline-none self-center w-60 text-center"
-              style={{textAlignLast: 'center'}}
-              onChange={e => setBook(e.target.value)}
-              value={bookSelected}
-            >
-              <option value="">Select a book</option>
-              <option value="1984">1984</option>
-              <option value="crime-and-punishment">Crime And Punishment</option>
-              <option value="dracula">Dracula</option>
-              <option value="the-great-gatsby">The Great Gatsby</option>
-              <option value="war-and-peace">War And Peace</option>
-            </select>
-          </div>
           <div className="flex items-center justify-evenly mb-2">
             <button
               onClick={() => changePage(pageNum - 1)}
