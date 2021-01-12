@@ -39,15 +39,10 @@ const IndexPage = () => {
 
   useEffect(() => {
     setCtx(canvas.current.getContext('2d'))
+    pdfjsLib.getDocument(PDFFile).promise.then((PDFDocumentProxy: any) => {
+      setPdfDoc(PDFDocumentProxy)
+    })
   }, [canvas])
-
-  useEffect(() => {
-    if (ctx) {
-      pdfjsLib.getDocument(PDFFile).promise.then((PDFDocumentProxy: any) => {
-        setPdfDoc(PDFDocumentProxy)
-      })
-    }
-  }, [ctx])
 
   useEffect(() => {
     if (pdfDoc) {

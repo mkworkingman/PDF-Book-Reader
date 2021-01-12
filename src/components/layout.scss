@@ -37,6 +37,7 @@ main {
 }
 
 .changePage {
+  width: 105px;
   padding: 10px 15px;
   border-radius: 7px;
   border: none;
@@ -49,7 +50,7 @@ main {
   font-weight: 500;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   position: relative;
-  transition: box-shadow .7s;
+  transition: box-shadow .3s;
 
   &::before, &::after {
     content: '';
