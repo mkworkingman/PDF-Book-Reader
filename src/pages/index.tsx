@@ -3,7 +3,6 @@ import * as pdfjsLib from 'pdfjs-dist'
 
 import Layout from "../components/layout"
 import SEO from "../components/seo"
-// import PDFFile from '../books/war-and-peace.pdf'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.5.207/pdf.worker.js`
 
@@ -11,6 +10,7 @@ const IndexPage = () => {
   const canvas = useRef<HTMLCanvasElement>(null)
   const [ctx, setCtx] = useState<CanvasRenderingContext2D>(null)
   const [bookSelected, setBookSelected] = useState<string>(localStorage.getItem('current') || '')
+  const [loading, setLoading] = useState<boolean>(localStorage.getItem('current') ? true : false)
   
   const scale: number = 1.2
   const [pdfDoc, setPdfDoc] = useState<any>(null)
@@ -33,23 +33,19 @@ const IndexPage = () => {
 
         page.render(renderContext).promise.then(() => {
           setPageRendering(false)
+          setLoading(false)
         })
       })
     }
   }
 
   useEffect(() => {
-    setCtx(canvas.current.getContext('2d'))
-  }, [canvas])
+    
+  }, []);
 
   useEffect(() => {
-    if (bookSelected) {
-      const PDFFile = require(`../books/${bookSelected}.pdf`)
-      pdfjsLib.getDocument(PDFFile).promise.then((PDFDocumentProxy: any) => {
-        setPdfDoc(PDFDocumentProxy)
-      })
-    }
-  }, [bookSelected])
+    setCtx(canvas.current.getContext('2d'))
+  }, [canvas])
 
   useEffect(() => {
     if (pdfDoc) {
@@ -57,21 +53,41 @@ const IndexPage = () => {
     }
   }, [pdfDoc])
 
+  useEffect(() => {
+    if (bookSelected) {
+      if (localStorage.getItem(bookSelected)) {
+        setPageNum(Number(localStorage.getItem(bookSelected)))
+        setGoTo(localStorage.getItem(bookSelected))
+      } else {
+        localStorage.setItem(bookSelected, '1')
+        setPageNum(1)
+      }
+
+      const PDFFile = require(`../books/${bookSelected}.pdf`)
+      pdfjsLib.getDocument(PDFFile).promise.then((PDFDocumentProxy: any) => {
+        setPdfDoc(PDFDocumentProxy)
+      })
+    }
+  }, [bookSelected])
+
   const changePage = (newPageNum: number) => {
     if (!pageRendering) {
       if (newPageNum > 0 && newPageNum <= pdfDoc.numPages) {
         setGoTo(newPageNum.toString())
         setPageNum(newPageNum)
         renderPage(newPageNum)
+        localStorage.setItem(bookSelected, newPageNum.toString())
       } else {
         if (newPageNum) {
           setGoTo(pdfDoc.numPages.toString())
           setPageNum(pdfDoc.numPages)
           renderPage(pdfDoc.numPages)
+          localStorage.setItem(bookSelected, pdfDoc.numPages.toString())
         } else {
           setGoTo('1')
           setPageNum(1)
           renderPage(1)
+          localStorage.setItem(bookSelected, '1')
         }
       }
     }
@@ -102,6 +118,7 @@ const IndexPage = () => {
 
   const setBook = (value: string) => {
     localStorage.setItem("current", value)
+    setLoading(true)
     setBookSelected(value)
   }
 
@@ -117,12 +134,14 @@ const IndexPage = () => {
   return (
     <Layout>
       <SEO title="Home" />
-      <div className="flex flex-col justify-center text-center">
+
+      <div className="flex flex-col items-center">
         <p>Please, select a book:</p>
         <select
           className="focus:outline-none self-center w-60 text-center"
           style={{textAlignLast: 'center'}}
           onChange={e => setBook(e.target.value)}
+          onKeyDown={e => e.preventDefault()}
           value={bookSelected}
         >
           <option value="" disabled>Select a book</option>
@@ -132,43 +151,44 @@ const IndexPage = () => {
           <option value="the-great-gatsby">The Great Gatsby</option>
           <option value="war-and-peace">War And Peace</option>
         </select>
-      </div>
-      {pdfDoc
-        ? <>
-          <div className="flex items-center justify-evenly mb-2">
+
+        {bookSelected &&
+          <div 
+            className="flex items-center mb-2 justify-between"
+            style={{width: 450}}
+          >
             <button
               onClick={() => changePage(pageNum - 1)}
               className="changePage focus:outline-none"
-              disabled={pageNum === 1 || pageRendering}
             >
               <span className="relative z-10">Prev Page</span>
             </button>
-            <p className="font-medium w-60 text-center">{pageNum} page of {pdfDoc && pdfDoc.numPages}</p>
+            {!loading &&
+              <p className="font-medium w-60 text-center">{pageNum} page of {pdfDoc && pdfDoc.numPages}</p>
+            }
             <button
               onClick={() => changePage(pageNum + 1)}
               className="changePage focus:outline-none"
-              disabled={pageNum === pdfDoc.numPages || pageRendering}
             >
               <span className="relative z-10">Next Page</span>
             </button>
           </div>
-        </>
-        : <div className="flex justify-center">
-          <Spinner />
-        </div>
-      }
-      <div className="flex justify-center items-center">
-        <div className={pageRendering ? 'hidden': 'flex flex-col items-center'}>
-          <canvas ref={canvas} />
-          <p className={"text-center font-medium" + (pdfDoc ? '' : ' hidden')}>Go to:</p>
+        }
+
+        <canvas ref={canvas} className={loading ? 'hidden' : ''}/>
+
+        {(pdfDoc && !loading)
+          ?         <div className={(pdfDoc && !loading) ? '' : 'hidden'}>
+          <p className="text-center font-medium">Go to:</p>
           <input
             value={goTo}
             onKeyDown={onKeyDown}
             onChange={changeGoTo}
-            className={"rounded-lg focus:outline-none border-2 border-solid border-indigo-400 w-40 px-2 py-1 focus:border-indigo-500 text-center font-medium" + (pdfDoc ? '' : ' hidden')}
+            className="rounded-lg focus:outline-none border-2 border-solid border-indigo-400 w-40 px-2 py-1 focus:border-indigo-500 text-center font-medium"
           />
         </div>
-        <Spinner display={pageRendering ? '' : 'hidden'} />
+          : <Spinner display={!localStorage.getItem('current') && 'hidden'} />
+        }
       </div>
     </Layout>
   )
